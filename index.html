@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Sistem Titipan Warung - Supplier Input Sendiri</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background: #f0f4f8; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
+        .card { transition: 0.2s; }
+        .card:hover { transform: translateY(-2px); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); }
+        .toast { transition: all 0.3s ease; }
+        .tab-active { border-bottom: 3px solid #3b82f6; color: #1e40af; font-weight: 600; }
+        input, button { transition: all 0.2s; }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <!-- Header -->
+    <div class="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-200 px-4 py-3 shadow-sm">
+        <div class="max-w-6xl mx-auto flex justify-between items-center flex-wrap gap-3">
+            <div class="flex items-center gap-3">
+                <div class="bg-blue-600 text-white p-2 rounded-xl"><i class="fas fa-store text-xl"></i></div>
+                <div><h1 class="font-bold text-xl">Warung Titipan</h1><p class="text-xs text-gray-500">Supplier titip pagi · jual · reset sore</p></div>
+            </div>
+            <div class="flex gap-2">
+                <div class="bg-gray-100 px-3 py-1.5 rounded-lg text-sm"><i class="far fa-calendar-alt mr-1"></i><span id="currentDate"></span></div>
+                <button id="resetBtn" class="bg-red-500 hover:bg-red-600 text-white px-4 py-1.5 rounded-lg text-sm font-medium shadow"><i class="fas fa-rotate-right mr-1"></i>Tutup & Reset</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-6xl mx-auto p-4 space-y-5">
+
+        <!-- Kartu Ringkasan -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-blue-500">
+                <div class="text-gray-500 text-xs">Omzet hari ini</div>
+                <div class="text-xl font-bold" id="summaryOmzet">Rp0</div>
+            </div>
+            <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-green-500">
+                <div class="text-gray-500 text-xs">Profit hari ini</div>
+                <div class="text-xl font-bold text-green-600" id="summaryProfit">Rp0</div>
+            </div>
+            <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-purple-500">
+                <div class="text-gray-500 text-xs">Supplier titip</div>
+                <div class="text-xl font-bold" id="summarySupplierCount">0</div>
+            </div>
+            <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-orange-500">
+                <div class="text-gray-500 text-xs">Total stok tersedia</div>
+                <div class="text-xl font-bold" id="summaryTotalStock">0</div>
+            </div>
+        </div>
+
+        <!-- Tab navigasi -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+            <div class="flex border-b border-gray-200 px-5 gap-2">
+                <button id="tabTitip" class="py-3 px-4 text-sm font-medium tab-active"><i class="fas fa-hand-holding-heart mr-1"></i>📦 Titip Pagi (Supplier)</button>
+                <button id="TabJual" class="py-3 px-4 text-sm font-medium text-gray-500 hover:text-gray-700"><i class="fas fa-cash-register mr-1"></i>💰 Input Penjualan</button>
+                <button id="TabLaporan" class="py-3 px-4 text-sm font-medium text-gray-500 hover:text-gray-700"><i class="fas fa-chart-line mr-1"></i>📊 Rekap Laporan</button>
+            </div>
+
+            <!-- Panel TITIP PAGI (Supplier input sendiri) -->
+            <div id="panelTitip" class="p-5">
+                <div class="mb-6 bg-blue-50 p-4 rounded-lg">
+                    <h3 class="font-semibold flex items-center gap-2"><i class="fas fa-arrow-right-to-bracket text-blue-600"></i>Form Titipan untuk Supplier</h3>
+                    <p class="text-sm text-gray-600 mb-3">Isi nama & jumlah produk yang ingin dititipkan hari ini (harga jual tetap Rp5.000 atau Rp10.000)</p>
+                    <form id="formTitip" class="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
+                        <div><label class="block text-xs font-medium">Nama Supplier</label><input type="text" id="supName" required class="w-full border rounded-lg px-3 py-2 text-sm"></div>
+                        <div><label class="block text-xs font-medium">Pilih Harga</label><select id="supPrice" class="w-full border rounded-lg px-3 py-2 text-sm"><option value="5000">Rp 5.000</option><option value="10000">Rp 10.000</option></select></div>
+                        <div><label class="block text-xs font-medium">Jumlah titip (unit)</label><input type="number" id="supQty" min="1" value="1" class="w-full border rounded-lg px-3 py-2 text-sm"></div>
+                        <div><button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700"><i class="fas fa-paper-plane mr-1"></i>Titipkan</button></div>
+                    </form>
+                </div>
+
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="font-semibold">📋 Daftar Titipan Hari Ini</h3>
+                    <span class="text-xs text-gray-400" id="titipCount">0 supplier</span>
+                </div>
+                <div id="daftarTitipan" class="space-y-2 max-h-96 overflow-y-auto">
+                    <!-- List titipan akan muncul di sini -->
+                </div>
+                <div id="emptyTitip" class="text-center py-10 text-gray-400">Belum ada titipan. Supplier bisa isi form di atas.</div>
+            </div>
+
+            <!-- Panel INPUT PENJUALAN (Admin) -->
+            <div id="panelJual" class="p-5 hidden">
+                <div class="mb-4 flex justify-between items-center">
+                    <h3 class="font-semibold">🔹 Catat Penjualan (berdasarkan supplier yang sudah titip)</h3>
+                    <span class="bg-gray-100 px-2 py-1 rounded text-xs">Stok otomatis berkurang</span>
+                </div>
+                <div id="jualContainer" class="space-y-4">
+                    <!-- setiap supplier dengan stok muncul di sini -->
+                </div>
+                <div id="emptyJual" class="text-center py-10 text-gray-400">Belum ada titipan hari ini. Supplier harus titip dulu di menu pertama.</div>
+            </div>
+
+            <!-- Panel LAPORAN -->
+            <div id="panelLaporan" class="p-5 hidden">
+                <div class="flex gap-2 mb-4 border-b pb-2">
+                    <button id="viewDaily" class="px-4 py-1 text-sm rounded-full bg-blue-100 text-blue-700">Harian</button>
+                    <button id="viewMonthly" class="px-4 py-1 text-sm rounded-full bg-gray-100">Bulanan</button>
+                    <button id="viewYearly" class="px-4 py-1 text-sm rounded-full bg-gray-100">Tahunan</button>
+                </div>
+                <div id="laporanContent" class="bg-gray-50 rounded-xl p-3 min-h-[300px]">
+                    <!-- isi laporan -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast notifikasi -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-gray-800 text-white px-5 py-2 rounded-full shadow-lg flex items-center gap-2 translate-y-20 opacity-0 transition-all duration-300 z-50"><i id="toastIcon" class="fas fa-check-circle text-green-400"></i><span id="toastMsg"></span></div>
+
+    <script>
+        // ---------- DATA MODEL ----------
+        // Data hari ini: titipan supplier (belum termasuk stok jualan)
+        let todayDeposits = [];   // { id, name, price, qty, timestamp }
+        // Data penjualan hari ini (terkait id supplier)
+        let todaySales = [];       // { depositId, soldQty, price }
+
+        // History untuk laporan (reset tiap hari)
+        let historyReports = [];    // { dateStr, omzet, profit, details }
+
+        // Load dari localStorage
+        function loadData() {
+            const savedDeposit = localStorage.getItem('warung_deposits');
+            const savedSales = localStorage.getItem('warung_sales');
+            const savedHistory = localStorage.getItem('warung_history');
+            const lastDate = localStorage.getItem('warung_lastDate');
+            const todayKey = new Date().toDateString();
+
+            // Cek apakah sudah ganti hari? Jika ya, harus reset otomatis (tapi data hari sebelumnya masuk history jika ada penjualan)
+            if (lastDate && lastDate !== todayKey) {
+                // Hari berganti -> otomatis reset dari malam sebelumnya? Tapi karena kita pakai manual reset, kami hanya akan mengingatkan.
+                // Untuk keamanan, jika ada data penjualan kemarin yang belum di-reset, kita akan simpan otomatis ke history.
+                if (todaySales.length > 0 || todayDeposits.length > 0) {
+                    autoArchiveBeforeNewDay();
+                }
+                localStorage.setItem('warung_lastDate', todayKey);
+                todayDeposits = [];
+                todaySales = [];
+                saveCurrentData();
+            } else if (!lastDate) {
+                localStorage.setItem('warung_lastDate', todayKey);
+            }
+
+            if (savedDeposit) todayDeposits = JSON.parse(savedDeposit);
+            if (savedSales) todaySales = JSON.parse(savedSales);
+            if (savedHistory) historyReports = JSON.parse(savedHistory);
+        }
+
+        function autoArchiveBeforeNewDay() {
+            // hitung total omzet profit dari penjualan hari sebelumnya
+            let omzet = 0, profit = 0;
+            for (let sale of todaySales) {
+                let total = sale.soldQty * sale.price;
+                omzet += total;
+                profit += (sale.price === 5000 ? (total * 0.2) : (total * 0.25)); // margin 20% & 25%
+            }
+            if (omzet > 0) {
+                historyReports.unshift({
+                    date: new Date().toLocaleDateString('id-ID'),
+                    dateISO: new Date().toISOString(),
+                    omzet: omzet,
+                    profit: profit,
+                    details: { deposits: todayDeposits.length, salesCount: todaySales.length }
+                });
+                localStorage.setItem('warung_history', JSON.stringify(historyReports));
+            }
+            todayDeposits = [];
+            todaySales = [];
+            saveCurrentData();
+        }
+
+        function saveCurrentData() {
+            localStorage.setItem('warung_deposits', JSON.stringify(todayDeposits));
+            localStorage.setItem('warung_sales', JSON.stringify(todaySales));
+        }
+
+        // Helper hitung stok tersisa untuk suatu deposit (berdasarkan penjualan)
+        function getRemainingQty(depositId, price) {
+            let soldTotal = todaySales.filter(s => s.depositId === depositId).reduce((sum, s) => sum + s.soldQty, 0);
+            const deposit = todayDeposits.find(d => d.id === depositId);
+            if (!deposit) return 0;
+            return deposit.qty - soldTotal;
+        }
+
+        // Render semua UI
+        function renderAll() {
+            renderTitipanList();
+            renderPenjualanPanel();
+            renderSummary();
+            renderLaporan();
+        }
+
+        // TAMPILAN TITIPAN (Supplier juga bisa lihat titipannya)
+        function renderTitipanList() {
+            const container = document.getElementById('daftarTitipan');
+            const emptyDiv = document.getElementById('emptyTitip');
+            const countSpan = document.getElementById('titipCount');
+            
+            if (todayDeposits.length === 0) {
+                container.innerHTML = '';
+                emptyDiv.classList.remove('hidden');
+                countSpan.innerText = '0 supplier';
+                return;
+            }
+            emptyDiv.classList.add('hidden');
+            countSpan.innerText = todayDeposits.length + ' supplier';
+            
+            container.innerHTML = todayDeposits.map(dep => {
+                const remaining = getRemainingQty(dep.id, dep.price);
+                return `
+                    <div class="bg-white border border-gray-200 rounded-xl p-3 flex justify-between items-center">
+                        <div>
+                            <span class="font-medium">${escapeHtml(dep.name)}</span>
+                            <span class="text-xs bg-gray-100 px-2 py-0.5 rounded-full ml-2">${dep.price === 5000 ? 'Rp5.000' : 'Rp10.000'}</span>
+                            <div class="text-sm">Titip: <strong>${dep.qty}</strong> unit · Sisa: <span class="${remaining <= 0 ? 'text-red-500' : 'text-green-600'}">${remaining}</span></div>
+                        </div>
+                        <div class="text-right text-xs text-gray-400">${new Date(dep.timestamp).toLocaleTimeString()}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // RENDER PENJUALAN (admin) - muncul per supplier yang masih punya sisa stok
+        function renderPenjualanPanel() {
+            const container = document.getElementById('jualContainer');
+            const emptyJual = document.getElementById('emptyJual');
+            
+            const activeDeposits = todayDeposits.filter(d => getRemainingQty(d.id, d.price) > 0);
+            if (activeDeposits.length === 0) {
+                container.innerHTML = '';
+                emptyJual.classList.remove('hidden');
+                return;
+            }
+            emptyJual.classList.add('hidden');
+            
+            container.innerHTML = activeDeposits.map(dep => {
+                const remaining = getRemainingQty(dep.id, dep.price);
+                const soldSoFar = dep.qty - remaining;
+                const priceLabel = dep.price === 5000 ? 'Rp5.000' : 'Rp10.000';
+                return `
+                    <div class="bg-white border rounded-xl p-4 shadow-sm">
+                        <div class="flex justify-between items-start mb-2">
+                            <div><span class="font-bold">${escapeHtml(dep.name)}</span> <span class="text-xs bg-blue-100 px-2 py-0.5 rounded">${priceLabel}</span></div>
+                            <div class="text-sm">Stok sisa: <strong class="text-green-700">${remaining}</strong> / ${dep.qty}</div>
+                        </div>
+                        <div class="flex items-center gap-3 mt-2">
+                            <button onclick="addSale(${dep.id}, ${dep.price}, -1)" class="bg-gray-200 hover:bg-gray-300 w-8 h-8 rounded-full"><i class="fas fa-minus"></i></button>
+                            <span class="text-xl font-semibold w-12 text-center" id="saleCount-${dep.id}">${soldSoFar}</span>
+                            <button onclick="addSale(${dep.id}, ${dep.price}, 1)" class="bg-blue-500 hover:bg-blue-600 text-white w-8 h-8 rounded-full"><i class="fas fa-plus"></i></button>
+                            <span class="text-sm text-gray-500 ml-2">terjual</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Fungsi menambah penjualan
+        window.addSale = function(depositId, price, delta) {
+            const deposit = todayDeposits.find(d => d.id === depositId);
+            if (!deposit) return;
+            const currentSold = todaySales.filter(s => s.depositId === depositId).reduce((sum, s) => sum + s.soldQty, 0);
+            const newSold = currentSold + delta;
+            if (newSold < 0) return;
+            if (newSold > deposit.qty) {
+                showToast('Stok tidak cukup!', 'error');
+                return;
+            }
+            // update penjualan
+            const existingSaleIndex = todaySales.findIndex(s => s.depositId === depositId);
+            if (existingSaleIndex !== -1) {
+                if (newSold === 0) todaySales.splice(existingSaleIndex, 1);
+                else todaySales[existingSaleIndex].soldQty = newSold;
+            } else if (newSold > 0) {
+                todaySales.push({ depositId: depositId, soldQty: newSold, price: price });
+            }
+            saveCurrentData();
+            renderAll();
+            showToast(`${delta > 0 ? 'Terjual +1' : 'Batalkan penjualan'}`, 'success');
+        };
+
+        // Submit titipan supplier
+        document.getElementById('formTitip').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('supName').value.trim();
+            const price = parseInt(document.getElementById('supPrice').value);
+            const qty = parseInt(document.getElementById('supQty').value);
+            if (!name || qty < 1) return;
+            const newDeposit = {
+                id: Date.now(),
+                name: name,
+                price: price,
+                qty: qty,
+                timestamp: new Date().toISOString()
+            };
+            todayDeposits.push(newDeposit);
+            saveCurrentData();
+            document.getElementById('supName').value = '';
+            document.getElementById('supQty').value = '1';
+            renderAll();
+            showToast(`${name} menitipkan ${qty} unit (${price === 5000 ? '5rb' : '10rb'})`, 'success');
+        });
+
+        // Reset & tutup warung (simpan history)
+        function performReset() {
+            if (todayDeposits.length === 0 && todaySales.length === 0) {
+                showToast('Tidak ada data hari ini, reset tidak perlu', 'info');
+                return;
+            }
+            // Hitung omzet dan profit
+            let omzet = 0, profit = 0;
+            for (let sale of todaySales) {
+                const total = sale.soldQty * sale.price;
+                omzet += total;
+                if (sale.price === 5000) profit += total * 0.2;
+                else profit += total * 0.25;
+            }
+            // Simpan ke history
+            const dateNow = new Date();
+            const dateLabel = dateNow.toLocaleDateString('id-ID');
+            historyReports.unshift({
+                date: dateLabel,
+                dateISO: dateNow.toISOString(),
+                omzet: omzet,
+                profit: profit,
+                details: { totalDeposit: todayDeposits.length, totalSold: todaySales.reduce((a,b)=>a+b.soldQty,0) }
+            });
+            localStorage.setItem('warung_history', JSON.stringify(historyReports));
+            // Kosongkan hari ini
+            todayDeposits = [];
+            todaySales = [];
+            saveCurrentData();
+            localStorage.setItem('warung_lastDate', new Date().toDateString());
+            renderAll();
+            showToast('Warung ditutup! Stok reset 0, semua data tersimpan', 'success');
+        }
+
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            if (confirm('Tutup warung dan reset semua stok? Omzet/profit hari ini akan tersimpan ke laporan.')) {
+                performReset();
+            }
+        });
+
+        // Ringkasan
+        function renderSummary() {
+            let omzet = 0, profit = 0;
+            for (let sale of todaySales) {
+                const total = sale.soldQty * sale.price;
+                omzet += total;
+                profit += (sale.price === 5000 ? total * 0.2 : total * 0.25);
+            }
+            document.getElementById('summaryOmzet').innerText = 'Rp' + omzet.toLocaleString();
+            document.getElementById('summaryProfit').innerText = 'Rp' + profit.toLocaleString();
+            document.getElementById('summarySupplierCount').innerText = todayDeposits.length;
+            const totalStock = todayDeposits.reduce((sum, d) => sum + getRemainingQty(d.id, d.price), 0);
+            document.getElementById('summaryTotalStock').innerText = totalStock;
+        }
+
+        // Laporan
+        let laporanMode = 'daily';
+        function renderLaporan() {
+            const container = document.getElementById('laporanContent');
+            if (laporanMode === 'daily') {
+                if (historyReports.length === 0) {
+                    container.innerHTML = '<div class="text-center p-10 text-gray-400">Belum ada laporan. Lakukan reset setelah berjualan.</div>';
+                    return;
+                }
+                container.innerHTML = `
+                    <table class="w-full text-sm">
+                        <thead class="bg-gray-100"><tr><th class="p-2 text-left">Tanggal</th><th class="p-2 text-right">Omzet</th><th class="p-2 text-right">Profit</th></tr></thead>
+                        <tbody>${historyReports.map(h => `<tr class="border-b"><td class="p-2">${h.date}</td><td class="p-2 text-right font-medium">Rp${h.omzet.toLocaleString()}</td><td class="p-2 text-right text-green-600">Rp${h.profit.toLocaleString()}</td></tr>`).join('')}</tbody>
+                    </table>
+                `;
+            } else if (laporanMode === 'monthly') {
+                const monthly = {};
+                historyReports.forEach(h => {
+                    const [day, month, year] = h.date.split('/');
+                    const key = `${year}-${month}`;
+                    if (!monthly[key]) monthly[key] = { omzet: 0, profit: 0, count: 0, monthName: `${month}/${year}` };
+                    monthly[key].omzet += h.omzet;
+                    monthly[key].profit += h.profit;
+                    monthly[key].count++;
+                });
+                container.innerHTML = `<div class="grid gap-3">${Object.values(monthly).map(m => `<div class="bg-white p-3 rounded shadow flex justify-between"><span>${m.monthName} (${m.count} hari)</span><span>Omzet Rp${m.omzet.toLocaleString()} | Profit Rp${m.profit.toLocaleString()}</span></div>`).join('')}</div>`;
+            } else {
+                const yearly = {};
+                historyReports.forEach(h => {
+                    const year = h.date.split('/')[2];
+                    if (!yearly[year]) yearly[year] = { omzet: 0, profit: 0 };
+                    yearly[year].omzet += h.omzet;
+                    yearly[year].profit += h.profit;
+                });
+                container.innerHTML = `<div class="space-y-2">${Object.entries(yearly).map(([y, val]) => `<div class="bg-white p-3 rounded shadow"><span class="font-bold">${y}</span> : Omzet Rp${val.omzet.toLocaleString()} · Profit Rp${val.profit.toLocaleString()}</div>`).join('')}</div>`;
+            }
+        }
+
+        // Tab switching
+        function initTabs() {
+            const tabTitip = document.getElementById('tabTitip');
+            const tabJual = document.getElementById('TabJual');
+            const tabLap = document.getElementById('TabLaporan');
+            const panelTitip = document.getElementById('panelTitip');
+            const panelJual = document.getElementById('panelJual');
+            const panelLap = document.getElementById('panelLaporan');
+
+            function setActive(active) {
+                [tabTitip, tabJual, tabLap].forEach(t => t.classList.remove('tab-active', 'text-blue-600', 'border-b-2', 'border-blue-500'));
+                if (active === 'titip') { tabTitip.classList.add('tab-active', 'text-blue-600', 'border-b-2', 'border-blue-500'); panelTitip.classList.remove('hidden'); panelJual.classList.add('hidden'); panelLap.classList.add('hidden'); }
+                if (active === 'jual') { tabJual.classList.add('tab-active', 'text-blue-600', 'border-b-2', 'border-blue-500'); panelJual.classList.remove('hidden'); panelTitip.classList.add('hidden'); panelLap.classList.add('hidden'); renderPenjualanPanel(); }
+                if (active === 'lap') { tabLap.classList.add('tab-active', 'text-blue-600', 'border-b-2', 'border-blue-500'); panelLap.classList.remove('hidden'); panelTitip.classList.add('hidden'); panelJual.classList.add('hidden'); renderLaporan(); }
+            }
+            tabTitip.onclick = () => setActive('titip');
+            tabJual.onclick = () => setActive('jual');
+            tabLap.onclick = () => setActive('lap');
+            setActive('titip');
+        }
+
+        // laporan mode
+        document.getElementById('viewDaily')?.addEventListener('click', () => { laporanMode = 'daily'; renderLaporan(); setActiveLaporanBtn('daily'); });
+        document.getElementById('viewMonthly')?.addEventListener('click', () => { laporanMode = 'monthly'; renderLaporan(); setActiveLaporanBtn('monthly'); });
+        document.getElementById('viewYearly')?.addEventListener('click', () => { laporanMode = 'yearly'; renderLaporan(); setActiveLaporanBtn('yearly'); });
+        function setActiveLaporanBtn(active) {
+            document.getElementById('viewDaily').className = active==='daily' ? 'px-4 py-1 text-sm rounded-full bg-blue-100 text-blue-700' : 'px-4 py-1 text-sm rounded-full bg-gray-100';
+            document.getElementById('viewMonthly').className = active==='monthly' ? 'px-4 py-1 text-sm rounded-full bg-blue-100 text-blue-700' : 'px-4 py-1 text-sm rounded-full bg-gray-100';
+            document.getElementById('viewYearly').className = active==='yearly' ? 'px-4 py-1 text-sm rounded-full bg-blue-100 text-blue-700' : 'px-4 py-1 text-sm rounded-full bg-gray-100';
+        }
+
+        function showToast(msg, type) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMsg').innerText = msg;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => toast.classList.add('translate-y-20', 'opacity-0'), 2500);
+        }
+
+        function escapeHtml(str) { return str.replace(/[&<>]/g, function(m){if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
+
+        // Update tanggal
+        document.getElementById('currentDate').innerText = new Date().toLocaleDateString('id-ID', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+
+        loadData();
+        renderAll();
+        initTabs();
+    </script>
+</body>
+</html>
