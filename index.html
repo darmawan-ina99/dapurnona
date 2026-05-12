@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Dapur Nona - Sistem Titip Supplier</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #030304;
+            font-family: 'Inter', sans-serif;
+            color: #fff;
+            overflow-x: hidden;
+        }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: #030304; }
+        ::-webkit-scrollbar-thumb { background: #7f1d1d; border-radius: 3px; }
+
+        .banner-red {
+            background: linear-gradient(135deg, #450a0a 0%, #7f1d1d 15%, #991b1b 30%, #b91c1c 50%, #991b1b 70%, #7f1d1d 85%, #450a0a 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        .banner-red::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at 50% 0%, rgba(220,38,38,0.3) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        .gold-shimmer {
+            background: linear-gradient(90deg, #92400e, #d97706, #fbbf24, #d97706, #92400e);
+            background-size: 200% 100%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: shimmer 3s ease-in-out infinite;
+        }
+        @keyframes shimmer {
+            0%, 100% { background-position: -200% center; }
+            50% { background-position: 200% center; }
+        }
+
+        .card-premium {
+            background: rgba(255,255,255,0.02);
+            backdrop-filter: blur(10px);
+            border-radius: 1rem;
+            transition: all 0.4s ease;
+        }
+        .card-premium:hover {
+            background: rgba(255,255,255,0.04);
+            box-shadow: 0 12px 40px -12px rgba(220,38,38,0.15);
+        }
+
+        .nav-glass {
+            backdrop-filter: blur(20px) saturate(180%);
+        }
+
+        .tab-btn {
+            transition: all 0.3s ease;
+            border-bottom: 2px solid transparent;
+            color: rgba(255,255,255,0.35);
+        }
+        .tab-btn:hover { color: rgba(255,255,255,0.6); }
+        .tab-btn.active {
+            color: #f87171;
+            border-bottom-color: #dc2626;
+            font-weight: 600;
+        }
+
+        .input-dark {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 0.75rem;
+            padding: 0.6rem 0.85rem;
+            font-size: 0.875rem;
+            color: #fff;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+        .input-dark::placeholder { color: rgba(255,255,255,0.2); }
+        .input-dark:focus {
+            outline: none;
+            border-color: rgba(220,38,38,0.5);
+            box-shadow: 0 0 0 3px rgba(220,38,38,0.1);
+        }
+        .input-dark option { background: #111114; color: #fff; }
+
+        .btn-gold {
+            background: linear-gradient(135deg, #92400e, #b45309);
+            color: #fbbf24;
+            border-radius: 0.75rem;
+            padding: 0.6rem 1.2rem;
+            font-weight: 600;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+        }
+        .btn-gold:hover { background: linear-gradient(135deg, #b45309, #d97706); transform: translateY(-1px); }
+
+        .btn-reset-premium {
+            background: linear-gradient(135deg, #450a0a, #7f1d1d);
+            color: #fca5a5;
+            border: 1px solid rgba(220,38,38,0.3);
+            border-radius: 9999px;
+            padding: 0.45rem 1.3rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .btn-reset-premium:hover {
+            background: linear-gradient(135deg, #7f1d1d, #991b1b);
+            color: #fff;
+        }
+
+        .btn-circle {
+            width: 2.2rem;
+            height: 2.2rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.25s ease;
+            cursor: pointer;
+        }
+        .btn-circle-minus {
+            background: rgba(255,255,255,0.06);
+            color: rgba(255,255,255,0.5);
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        .btn-circle-minus:hover { background: rgba(255,255,255,0.1); color: #fff; }
+        .btn-circle-plus {
+            background: linear-gradient(135deg, #991b1b, #b91c1c);
+            color: #fff;
+            box-shadow: 0 4px 15px -3px rgba(220,38,38,0.4);
+        }
+        .btn-circle-plus:hover { transform: scale(1.05); }
+
+        .toast-premium {
+            background: rgba(17,17,20,0.95);
+            border: 1px solid rgba(220,38,38,0.2);
+            backdrop-filter: blur(20px);
+            border-radius: 1rem;
+            padding: 0.75rem 1.25rem;
+        }
+
+        .deco-line {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(220,38,38,0.4), rgba(251,191,36,0.3), rgba(220,38,38,0.4), transparent);
+        }
+
+        .lap-btn {
+            padding: 0.35rem 1rem;
+            font-size: 0.7rem;
+            border-radius: 9999px;
+            font-weight: 500;
+            transition: all 0.25s ease;
+            cursor: pointer;
+            border: none;
+        }
+        .lap-btn-active { background: rgba(220,38,38,0.15); color: #f87171; }
+        .lap-btn-inactive { background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.3); }
+        .lap-btn-inactive:hover { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.5); }
+
+        .reveal-up {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: revealUp 0.6s cubic-bezier(0.16,1,0.3,1) forwards;
+        }
+        @keyframes revealUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
+        .delay-4 { animation-delay: 0.4s; }
+    </style>
+</head>
+<body>
+
+    <!-- BANNER MERAH -->
+    <div class="banner-red relative z-50" id="topBanner">
+        <div class="absolute top-0 left-0 right-0 h-[1px]" style="background: linear-gradient(90deg, transparent 5%, rgba(251,191,36,0.5) 30%, rgba(251,191,36,0.7) 50%, rgba(251,191,36,0.5) 70%, transparent 95%);"></div>
+        <div class="relative z-10 max-w-6xl mx-auto px-5 py-10 md:py-14 text-center">
+            <div class="reveal-up inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/10 mb-5">
+                <i class="fas fa-utensils text-xl text-amber-400"></i>
+            </div>
+            <h1 class="reveal-up delay-1 text-4xl md:text-6xl font-black tracking-tight leading-tight mb-3">
+                <span class="text-white">DAPUR</span> <span class="gold-shimmer">NONA</span>
+            </h1>
+            <p class="reveal-up delay-2 text-sm text-red-100/50 max-w-md mx-auto font-light tracking-wide">Masakan Rumah, Rasa Istimewa</p>
+            <div class="reveal-up delay-3 mt-5 flex items-center justify-center gap-4 text-[10px] tracking-[0.15em] uppercase text-red-200/35 font-medium">
+                <span id="currentDateBanner"></span>
+                <span class="w-1 h-1 rounded-full bg-amber-400/40"></span>
+                <span id="hijriDateBanner">7 Syawal 1447 H</span>
+            </div>
+        </div>
+        <div class="absolute bottom-0 left-0 right-0 h-[1px]" style="background: linear-gradient(90deg, transparent 5%, rgba(251,191,36,0.5) 30%, rgba(251,191,36,0.7) 50%, rgba(251,191,36,0.5) 70%, transparent 95%);"></div>
+        <div class="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-lux-dark-500 to-transparent pointer-events-none"></div>
+    </div>
+
+    <!-- HEADER NAV -->
+    <div class="sticky top-0 z-40 nav-glass bg-black/80 border-b border-white/5">
+        <div class="max-w-6xl mx-auto px-5 py-3">
+            <div class="flex justify-between items-center flex-wrap gap-3">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-red-700 to-red-900 flex items-center justify-center">
+                        <i class="fas fa-utensils text-xs text-amber-400"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-sm font-bold tracking-[0.15em] uppercase text-white">Dapur Nona</h1>
+                        <p class="text-[9px] text-white/25 tracking-wider">Sistem Titip Supplier</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="text-right hidden sm:block">
+                        <div class="text-[10px] font-medium text-white/50" id="currentDate"></div>
+                        <div class="text-[9px] text-white/20" id="hijriDate">7 Syawal 1447 H</div>
+                    </div>
+                    <button id="resetBtn" class="btn-reset-premium"><i class="fas fa-door-open mr-1.5"></i>Tutup & Reset</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="max-w-6xl mx-auto px-5 py-6 space-y-5 relative z-10">
+
+        <!-- METRIK UTAMA -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="card-premium p-5 reveal-up">
+                <div class="flex items-center gap-2 mb-3">
+                    <div class="w-8 h-8 rounded-lg bg-red-900/30 flex items-center justify-center">
+                        <i class="fas fa-coins text-xs text-red-400"></i>
+                    </div>
+                    <span class="text-[9px] tracking-[0.15em] uppercase text-white/25 font-semibold">Omzet Hari Ini</span>
+                </div>
+                <div class="text-2xl font-black text-white" id="summaryOmzet">Rp0</div>
+                <div class="text-[10px] text-white/20 mt-1.5" id="omzetPercent">0% dari kemarin</div>
+            </div>
+            <div class="card-premium p-5 reveal-up delay-1">
+                <div class="flex items-center gap-2 mb-3">
+                    <div class="w-8 h-8 rounded-lg bg-emerald-900/20 flex items-center justify-center">
+                        <i class="fas fa-chart-line text-xs text-emerald-400"></i>
+                    </div>
+                    <span class="text-[9px] tracking-[0.15em] uppercase text-white/25 font-semibold">Profit Hari Ini</span>
+                </div>
+                <div class="text-2xl font-black text-emerald-400" id="summaryProfit">Rp0</div>
+                <div class="text-[10px] text-white/20 mt-1.5" id="profitPercent">0% dari kemarin</div>
+            </div>
+            <div class="card-premium p-5 reveal-up delay-2">
+                <div class="flex items-center gap-2 mb-3">
+                    <div class="w-8 h-8 rounded-lg bg-amber-900/20 flex items-center justify-center">
+                        <i class="fas fa-truck text-xs text-amber-400"></i>
+                    </div>
+                    <span class="text-[9px] tracking-[0.15em] uppercase text-white/25 font-semibold">Supplier Titip</span>
+                </div>
+                <div class="text-2xl font-black text-white" id="summarySupplierCount">0</div>
+            </div>
+            <div class="card-premium p-5 reveal-up delay-3">
+                <div class="flex items-center gap-2 mb-3">
+                    <div class="w-8 h-8 rounded-lg bg-red-900/30 flex items-center justify-center">
+                        <i class="fas fa-boxes-stacked text-xs text-red-400"></i>
+                    </div>
+                    <span class="text-[9px] tracking-[0.15em] uppercase text-white/25 font-semibold">Total Stok</span>
+                </div>
+                <div class="text-2xl font-black text-white" id="summaryTotalStock">0</div>
+            </div>
+        </div>
+
+        <!-- METRIK TAMBAHAN -->
+        <div class="grid grid-cols-2 gap-4">
+            <div class="card-premium p-4 flex items-center gap-4 reveal-up delay-2">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-red-800/40 to-red-900/20 flex items-center justify-center">
+                    <i class="fas fa-users text-sm text-red-400"></i>
+                </div>
+                <div>
+                    <div class="text-[9px] tracking-[0.12em] uppercase text-white/25 font-semibold">Total Supplier</div>
+                    <div class="text-xl font-bold text-white" id="totalSupplierCount">0</div>
+                </div>
+            </div>
+            <div class="card-premium p-4 flex items-center gap-4 reveal-up delay-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-800/30 to-emerald-900/15 flex items-center justify-center">
+                    <i class="fas fa-bowl-food text-sm text-emerald-400"></i>
+                </div>
+                <div>
+                    <div class="text-[9px] tracking-[0.12em] uppercase text-white/25 font-semibold">Produk Tersedia</div>
+                    <div class="text-xl font-bold text-white" id="totalProductTypes">0</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB PANEL -->
+        <div class="card-premium overflow-hidden reveal-up delay-3">
+            <div class="flex border-b border-white/5 px-5 gap-1">
+                <button id="tabTitip" class="tab-btn active py-3.5 px-4 text-xs tracking-wide">
+                    <i class="fas fa-hand-holding-heart mr-1.5"></i>Titip Pagi
+                </button>
+                <button id="TabJual" class="tab-btn py-3.5 px-4 text-xs tracking-wide">
+                    <i class="fas fa-cash-register mr-1.5"></i>Input Penjualan
+                </button>
+                <button id="TabLaporan" class="tab-btn py-3.5 px-4 text-xs tracking-wide">
+                    <i class="fas fa-chart-line mr-1.5"></i>Rekap Laporan
+                </button>
+            </div>
+
+            <!-- PANEL TITIP -->
+            <div id="panelTitip" class="p-5">
+                <div class="mb-6 rounded-2xl p-5 border border-red-900/20" style="background: linear-gradient(135deg, rgba(127,29,29,0.08) 0%, rgba(69,10,10,0.05) 100%);">
+                    <div class="flex items-center gap-2 mb-1">
+                        <div class="w-6 h-6 rounded-md bg-red-800/30 flex items-center justify-center">
+                            <i class="fas fa-plus text-[8px] text-red-400"></i>
+                        </div>
+                        <h3 class="text-sm font-semibold text-white">Form Titipan untuk Supplier</h3>
+                    </div>
+                    <p class="text-[11px] text-white/25 mb-4 ml-8">Isi nama & jumlah produk yang ingin dititipkan (harga Rp5.000 atau Rp10.000)</p>
+                    <form id="formTitip" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                        <div>
+                            <label class="block text-[10px] tracking-[0.1em] uppercase text-white/30 font-semibold mb-1.5">Nama Supplier</label>
+                            <input type="text" id="supName" placeholder="Masukkan nama supplier" class="input-dark" required>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] tracking-[0.1em] uppercase text-white/30 font-semibold mb-1.5">Pilih Harga</label>
+                            <select id="supPrice" class="input-dark">
+                                <option value="5000">Rp 5.000</option>
+                                <option value="10000">Rp 10.000</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] tracking-[0.1em] uppercase text-white/30 font-semibold mb-1.5">Jumlah titip (unit)</label>
+                            <input type="number" id="supQty" min="1" value="1" class="input-dark">
+                        </div>
+                        <div>
+                            <button type="submit" class="btn-gold w-full"><i class="fas fa-save mr-1.5"></i>Simpan Titipan</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="text-sm font-semibold text-white flex items-center gap-2">
+                        <i class="fas fa-clipboard-list text-xs text-white/20"></i>
+                        Daftar Titipan Hari Ini
+                    </h3>
+                    <span class="text-[10px] text-white/20 bg-white/5 px-3 py-1 rounded-full" id="titipCount">0 supplier</span>
+                </div>
+                <div id="daftarTitipan" class="space-y-2 max-h-96 overflow-y-auto pr-1"></div>
+                <div id="emptyTitip" class="text-center py-12 rounded-xl" style="background: rgba(255,255,255,0.015);">
+                    <i class="fas fa-inbox text-2xl text-white/10 mb-3 block"></i>
+                    <p class="text-xs text-white/20">Belum ada titipan. Supplier bisa isi form di atas.</p>
+                </div>
+            </div>
+
+            <!-- PANEL PENJUALAN -->
+            <div id="panelJual" class="p-5 hidden">
+                <div class="mb-4 flex justify-between items-center flex-wrap gap-2">
+                    <h3 class="text-sm font-semibold text-white flex items-center gap-2">
+                        <i class="fas fa-cash-register text-xs text-white/20"></i>
+                        Catat Penjualan
+                    </h3>
+                    <span class="text-[10px] text-white/20 bg-white/5 px-3 py-1 rounded-full">Stok otomatis berkurang</span>
+                </div>
+                <div id="jualContainer" class="space-y-3"></div>
+                <div id="emptyJual" class="text-center py-12 rounded-xl" style="background: rgba(255,255,255,0.015);">
+                    <i class="fas fa-store-slash text-2xl text-white/10 mb-3 block"></i>
+                    <p class="text-xs text-white/20">Belum ada titipan hari ini. Supplier harus titip dulu di menu pertama.</p>
+                </div>
+            </div>
+
+            <!-- PANEL LAPORAN -->
+            <div id="panelLaporan" class="p-5 hidden">
+                <div class="flex gap-2 mb-4">
+                    <button id="viewDaily" class="lap-btn lap-btn-active">Harian</button>
+                    <button id="viewMonthly" class="lap-btn lap-btn-inactive">Bulanan</button>
+                    <button id="viewYearly" class="lap-btn lap-btn-inactive">Tahunan</button>
+                </div>
+                <div id="laporanContent" class="rounded-xl p-1 min-h-[300px]" style="background: rgba(255,255,255,0.015);"></div>
+            </div>
+        </div>
+
+        <div class="text-center py-6">
+            <div class="deco-line max-w-xs mx-auto mb-4"></div>
+            <p class="text-[9px] tracking-[0.2em] uppercase text-white/10 font-medium">© 2025 Dapur Nona · All rights reserved</p>
+        </div>
+    </div>
+
+    <!-- TOAST -->
+    <div id="toast" class="fixed bottom-5 right-5 toast-premium flex items-center gap-2.5 translate-y-20 opacity-0 transition-all duration-300 z-50">
+        <i id="toastIcon" class="fas fa-check-circle text-emerald-400 text-sm"></i>
+        <span id="toastMsg" class="text-xs text-white/80 font-medium"></span>
+    </div>
+
+    <script>
+        // ==================== DATA MODEL ====================
+        let todayDeposits = [];
+        let todaySales = [];
+        let historyReports = [];
+
+        function saveCurrentData() {
+            localStorage.setItem('dapurnona_deposits', JSON.stringify(todayDeposits));
+            localStorage.setItem('dapurnona_sales', JSON.stringify(todaySales));
+            localStorage.setItem('dapurnona_history', JSON.stringify(historyReports));
+        }
+
+        function loadData() {
+            const savedDeposit = localStorage.getItem('dapurnona_deposits');
+            const savedSales = localStorage.getItem('dapurnona_sales');
+            const savedHistory = localStorage.getItem('dapurnona_history');
+            const lastDate = localStorage.getItem('dapurnona_lastDate');
+            const todayKey = new Date().toDateString();
+
+            if (lastDate && lastDate !== todayKey) {
+                if (todayDeposits.length > 0 || todaySales.length > 0) archiveCurrentDay();
+                todayDeposits = [];
+                todaySales = [];
+                saveCurrentData();
+                localStorage.setItem('dapurnona_lastDate', todayKey);
+            } else if (!lastDate) {
+                localStorage.setItem('dapurnona_lastDate', todayKey);
+            }
+
+            if (savedDeposit) todayDeposits = JSON.parse(savedDeposit);
+            if (savedSales) todaySales = JSON.parse(savedSales);
+            if (savedHistory) historyReports = JSON.parse(savedHistory);
+        }
+
+        function archiveCurrentDay() {
+            let omzet = 0, profit = 0;
+            for (let sale of todaySales) {
+                let total = sale.soldQty * sale.price;
+                omzet += total;
+                profit += (sale.price === 5000 ? total * 0.2 : total * 0.25);
+            }
+            if (omzet === 0 && todayDeposits.length === 0) return;
+            const dateLabel = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+            historyReports.unshift({
+                date: dateLabel,
+                dateISO: new Date().toISOString(),
+                omzet: omzet,
+                profit: Math.round(profit),
+                details: { totalSupplier: todayDeposits.length, totalSold: todaySales.reduce((a,b)=>a+b.soldQty,0) }
+            });
+            saveCurrentData();
+        }
+
+        function getRemainingQty(depositId) {
+            const deposit = todayDeposits.find(d => d.id === depositId);
+            if (!deposit) return 0;
+            let soldTotal = todaySales.filter(s => s.depositId === depositId).reduce((sum, s) => sum + s.soldQty, 0);
+            return deposit.qty - soldTotal;
+        }
+
+        function getPercentChange(currentValue) {
+            if (historyReports.length === 0) return 0;
+            const todayDate = new Date().toDateString();
+            for (let i = 0; i < historyReports.length; i++) {
+                const histDate = new Date(historyReports[i].dateISO).toDateString();
+                if (histDate !== todayDate) {
+                    const yesterdayVal = (historyReports[i].omzet || 0);
+                    if (yesterdayVal === 0) return 0;
+                    return Math.round(((currentValue - yesterdayVal) / yesterdayVal) * 100);
+                }
+            }
+            return 0;
+        }
+
+        function renderAll() {
+            renderTitipanList();
+            renderPenjualanPanel();
+            renderSummary();
+            if (!document.getElementById('panelLaporan').classList.contains('hidden')) renderLaporan();
+        }
+
+        function renderTitipanList() {
+            const container = document.getElementById('daftarTitipan');
+            const emptyDiv = document.getElementById('emptyTitip');
+            const countSpan = document.getElementById('titipCount');
+            if (todayDeposits.length === 0) {
+                container.innerHTML = '';
+                emptyDiv.classList.remove('hidden');
+                countSpan.innerText = '0 supplier';
+                return;
+            }
+            emptyDiv.classList.add('hidden');
+            countSpan.innerText = todayDeposits.length + ' supplier';
+            container.innerHTML = todayDeposits.map(dep => {
+                const remaining = getRemainingQty(dep.id);
+                return `
+                    <div class="rounded-xl p-3.5 flex justify-between items-center border border-white/5 hover:border-white/10 transition-all" style="background: rgba(255,255,255,0.02);">
+                        <div>
+                            <span class="font-medium text-sm text-white/80">${escapeHtml(dep.name)}</span>
+                            <span class="text-[9px] ml-2 px-2 py-0.5 rounded-full ${dep.price === 5000 ? 'bg-amber-900/15 text-amber-400/60' : 'bg-red-900/15 text-red-400/60'}">${dep.price === 5000 ? 'Rp5.000' : 'Rp10.000'}</span>
+                            <div class="text-[11px] text-white/25 mt-0.5">Titip: <strong>${dep.qty}</strong> unit · Sisa: <span class="${remaining <= 0 ? 'text-red-400' : 'text-emerald-400'}">${remaining}</span></div>
+                        </div>
+                        <div class="text-[10px] text-white/15">${new Date(dep.timestamp).toLocaleTimeString('id-ID', {hour:'2-digit',minute:'2-digit'})}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderPenjualanPanel() {
+            const container = document.getElementById('jualContainer');
+            const emptyJual = document.getElementById('emptyJual');
+            const active = todayDeposits.filter(d => getRemainingQty(d.id) > 0);
+            if (active.length === 0) {
+                container.innerHTML = '';
+                emptyJual.classList.remove('hidden');
+                return;
+            }
+            emptyJual.classList.add('hidden');
+            container.innerHTML = active.map(dep => {
+                const remaining = getRemainingQty(dep.id);
+                const soldSoFar = dep.qty - remaining;
+                const progressPercent = (soldSoFar / dep.qty) * 100;
+                return `
+                    <div class="rounded-xl p-4 border border-white/5 hover:border-white/10 transition-all" style="background: rgba(255,255,255,0.02);">
+                        <div class="flex justify-between items-start mb-3">
+                            <div>
+                                <span class="font-semibold text-sm text-white/85">${escapeHtml(dep.name)}</span>
+                                <span class="text-[9px] ml-2 px-2 py-0.5 rounded-full bg-amber-900/10 text-amber-400/50">${dep.price === 5000 ? 'Rp5.000' : 'Rp10.000'}</span>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-[10px] text-white/20">Stok sisa</div>
+                                <div class="text-sm font-bold text-emerald-400">${remaining} <span class="text-white/15">/ ${dep.qty}</span></div>
+                            </div>
+                        </div>
+                        <div class="w-full h-1 rounded-full bg-white/5 mb-3 overflow-hidden">
+                            <div class="h-full rounded-full transition-all ${progressPercent >= 80 ? 'bg-red-500' : 'bg-gradient-to-r from-red-700 to-red-500'}" style="width: ${progressPercent}%"></div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <button onclick="addSale(${dep.id}, ${dep.price}, -1)" class="btn-circle btn-circle-minus"><i class="fas fa-minus"></i></button>
+                            <span class="text-xl font-bold text-white w-12 text-center" id="saleCount-${dep.id}">${soldSoFar}</span>
+                            <button onclick="addSale(${dep.id}, ${dep.price}, 1)" class="btn-circle btn-circle-plus"><i class="fas fa-plus"></i></button>
+                            <span class="text-[10px] text-white/20 ml-1">terjual</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        window.addSale = function(depositId, price, delta) {
+            const deposit = todayDeposits.find(d => d.id === depositId);
+            if (!deposit) return;
+            const currentSold = todaySales.filter(s => s.depositId === depositId).reduce((sum, s) => sum + s.soldQty, 0);
+            const newSold = currentSold + delta;
+            if (newSold < 0) return;
+            if (newSold > deposit.qty) { showToast('Stok tidak cukup!', 'error'); return; }
+            const idx = todaySales.findIndex(s => s.depositId === depositId);
+            if (idx !== -1) {
+                if (newSold === 0) todaySales.splice(idx, 1);
+                else todaySales[idx].soldQty = newSold;
+            } else if (newSold > 0) {
+                todaySales.push({ depositId, soldQty: newSold, price });
+            }
+            saveCurrentData();
+            renderAll();
+            showToast(`${delta > 0 ? 'Terjual +1' : 'Batalkan penjualan'}`, 'success');
+        };
+
+        document.getElementById('formTitip').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('supName').value.trim();
+            const price = parseInt(document.getElementById('supPrice').value);
+            const qty = parseInt(document.getElementById('supQty').value);
+            if (!name || qty < 1) { showToast('Nama supplier & jumlah harus diisi', 'error'); return; }
+            todayDeposits.push({
+                id: Date.now(),
+                name, price, qty,
+                timestamp: new Date().toISOString()
+            });
+            saveCurrentData();
+            document.getElementById('supName').value = '';
+            document.getElementById('supQty').value = '1';
+            renderAll();
+            showToast(`${name} menitipkan ${qty} unit (${price === 5000 ? '5rb' : '10rb'})`, 'success');
+        });
+
+        function performReset() {
+            if (todayDeposits.length === 0 && todaySales.length === 0) {
+                showToast('Tidak ada data hari ini', 'info');
+                return;
+            }
+            let omzet = 0, profit = 0;
+            for (let sale of todaySales) {
+                let total = sale.soldQty * sale.price;
+                omzet += total;
+                profit += (sale.price === 5000 ? total * 0.2 : total * 0.25);
+            }
+            const dateLabel = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+            historyReports.unshift({
+                date: dateLabel,
+                dateISO: new Date().toISOString(),
+                omzet, profit: Math.round(profit),
+                details: { totalSupplier: todayDeposits.length, totalSold: todaySales.reduce((a,b)=>a+b.soldQty,0) }
+            });
+            saveCurrentData();
+            todayDeposits = [];
+            todaySales = [];
+            saveCurrentData();
+            localStorage.setItem('dapurnona_lastDate', new Date().toDateString());
+            renderAll();
+            showToast('Warung ditutup! Stok reset, data tersimpan ke laporan', 'success');
+        }
+
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            if (confirm('Tutup warung dan reset semua stok?')) performReset();
+        });
+
+        function renderSummary() {
+            let omzet = 0, profit = 0;
+            for (let sale of todaySales) {
+                let total = sale.soldQty * sale.price;
+                omzet += total;
+                profit += (sale.price === 5000 ? total * 0.2 : total * 0.25);
+            }
+            profit = Math.round(profit);
+            document.getElementById('summaryOmzet').innerText = 'Rp' + omzet.toLocaleString('id-ID');
+            document.getElementById('summaryProfit').innerText = 'Rp' + profit.toLocaleString('id-ID');
+            document.getElementById('summarySupplierCount').innerText = todayDeposits.length;
+            const totalStock = todayDeposits.reduce((sum, d) => sum + getRemainingQty(d.id), 0);
+            document.getElementById('summaryTotalStock').innerText = totalStock;
+            document.getElementById('totalSupplierCount').innerText = todayDeposits.length;
+            document.getElementById('totalProductTypes').innerText = todayDeposits.filter(d => getRemainingQty(d.id) > 0).length;
+
+            const percent = getPercentChange(omzet);
+            const percentProfit = getPercentChange(profit);
+            document.getElementById('omzetPercent').innerHTML = `<span class="${percent >= 0 ? 'text-emerald-400' : 'text-red-400'}">${percent >= 0 ? '↑' : '↓'} ${Math.abs(percent)}%</span> <span class="text-white/15">dari kemarin</span>`;
+            document.getElementById('profitPercent').innerHTML = `<span class="${percentProfit >= 0 ? 'text-emerald-400' : 'text-red-400'}">${percentProfit >= 0 ? '↑' : '↓'} ${Math.abs(percentProfit)}%</span> <span class="text-white/15">dari kemarin</span>`;
+        }
+
+        let laporanMode = 'daily';
+        function renderLaporan() {
+            const container = document.getElementById('laporanContent');
+            if (laporanMode === 'daily') {
+                if (historyReports.length === 0) {
+                    container.innerHTML = `<div class="text-center py-16"><i class="fas fa-file-circle-xmark text-2xl text-white/8 mb-3 block"></i><p class="text-xs text-white/15">Belum ada laporan. Lakukan reset setelah berjualan.</p></div>`;
+                    return;
+                }
+                container.innerHTML = `<table class="w-full"><thead><tr><th style="text-align:left;padding:0.6rem 0.8rem;color:rgba(255,255,255,0.3);font-size:0.65rem;">Tanggal</th><th style="text-align:right;padding:0.6rem 0.8rem;color:rgba(255,255,255,0.3);font-size:0.65rem;">Omzet</th><th style="text-align:right;padding:0.6rem 0.8rem;color:rgba(255,255,255,0.3);font-size:0.65rem;">Profit</th></tr></thead><tbody>${historyReports.map(h => `<tr><td style="padding:0.65rem 0.8rem;color:rgba(255,255,255,0.5);font-size:0.8rem">${h.date}</td><td style="padding:0.65rem 0.8rem;text-align:right;color:rgba(255,255,255,0.7)">Rp${h.omzet.toLocaleString('id-ID')}</td><td style="padding:0.65rem 0.8rem;text-align:right;color:#4ade80">Rp${h.profit.toLocaleString('id-ID')}</td></tr>`).join('')}</tbody></table>`;
+            } else if (laporanMode === 'monthly') {
+                const monthly = {};
+                historyReports.forEach(h => {
+                    const parts = h.date.split(' ');
+                    const key = (parts[0] || '') + ' ' + (parts[2] || new Date(h.dateISO).getFullYear());
+                    if (!monthly[key]) monthly[key] = { omzet: 0, profit: 0, count: 0 };
+                    monthly[key].omzet += h.omzet;
+                    monthly[key].profit += h.profit;
+                    monthly[key].count++;
+                });
+                if (Object.keys(monthly).length === 0) { container.innerHTML = `<div class="text-center py-16"><p class="text-xs text-white/15">Belum ada data bulanan.</p></div>`; return; }
+                container.innerHTML = `<div class="space-y-2">${Object.entries(monthly).map(([k,v]) => `<div class="rounded-xl p-4 border border-white/5 flex justify-between items-center flex-wrap gap-2" style="background:rgba(255,255,255,0.02)"><span class="text-sm text-white/60">${k} (${v.count} hari)</span><span class="text-xs">Omzet Rp${v.omzet.toLocaleString('id-ID')} | Profit Rp${v.profit.toLocaleString('id-ID')}</span></div>`).join('')}</div>`;
+            } else {
+                const yearly = {};
+                historyReports.forEach(h => {
+                    const year = new Date(h.dateISO).getFullYear();
+                    if (!yearly[year]) yearly[year] = { omzet: 0, profit: 0 };
+                    yearly[year].omzet += h.omzet;
+                    yearly[year].profit += h.profit;
+                });
+                if (Object.keys(yearly).length === 0) { container.innerHTML = `<div class="text-center py-16"><p class="text-xs text-white/15">Belum ada data tahunan.</p></div>`; return; }
+                container.innerHTML = `<div class="space-y-2">${Object.entries(yearly).map(([y,v]) => `<div class="rounded-xl p-4 border border-white/5 flex justify-between items-center flex-wrap gap-2" style="background:rgba(255,255,255,0.02)"><span class="text-sm font-bold text-white/70">${y}</span><span class="text-xs">Omzet Rp${v.omzet.toLocaleString('id-ID')} | Profit Rp${v.profit.toLocaleString('id-ID')}</span></div>`).join('')}</div>`;
+            }
+        }
+
+        function initTabs() {
+            const tabTitip = document.getElementById('tabTitip');
+            const tabJual = document.getElementById('TabJual');
+            const tabLap = document.getElementById('TabLaporan');
+            const pTitip = document.getElementById('panelTitip');
+            const pJual = document.getElementById('panelJual');
+            const pLap = document.getElementById('panelLaporan');
+
+            function setActive(active) {
+                [tabTitip, tabJual, tabLap].forEach(t => t.classList.remove('active'));
+                pTitip.classList.add('hidden');
+                pJual.classList.add('hidden');
+                pLap.classList.add('hidden');
+                if (active === 'titip') { tabTitip.classList.add('active'); pTitip.classList.remove('hidden'); }
+                if (active === 'jual') { tabJual.classList.add('active'); pJual.classList.remove('hidden'); renderPenjualanPanel(); }
+                if (active === 'lap') { tabLap.classList.add('active'); pLap.classList.remove('hidden'); renderLaporan(); }
+            }
+            tabTitip.onclick = () => setActive('titip');
+            tabJual.onclick = () => setActive('jual');
+            tabLap.onclick = () => setActive('lap');
+            setActive('titip');
+        }
+
+        document.getElementById('viewDaily')?.addEventListener('click', () => { laporanMode = 'daily'; renderLaporan(); setLapActive('daily'); });
+        document.getElementById('viewMonthly')?.addEventListener('click', () => { laporanMode = 'monthly'; renderLaporan(); setLapActive('monthly'); });
+        document.getElementById('viewYearly')?.addEventListener('click', () => { laporanMode = 'yearly'; renderLaporan(); setLapActive('yearly'); });
+
+        function setLapActive(active) {
+            const d = document.getElementById('viewDaily');
+            const m = document.getElementById('viewMonthly');
+            const y = document.getElementById('viewYearly');
+            if (d) d.className = active === 'daily' ? 'lap-btn lap-btn-active' : 'lap-btn lap-btn-inactive';
+            if (m) m.className = active === 'monthly' ? 'lap-btn lap-btn-active' : 'lap-btn lap-btn-inactive';
+            if (y) y.className = active === 'yearly' ? 'lap-btn lap-btn-active' : 'lap-btn lap-btn-inactive';
+        }
+
+        function showToast(msg, type) {
+            const toast = document.getElementById('toast');
+            const icon = document.getElementById('toastIcon');
+            icon.className = type === 'error' ? 'fas fa-exclamation-circle text-red-400 text-sm' : 'fas fa-check-circle text-emerald-400 text-sm';
+            document.getElementById('toastMsg').innerText = msg;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => toast.classList.add('translate-y-20', 'opacity-0'), 2500);
+        }
+
+        function escapeHtml(str) { return String(str).replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;'); }
+
+        const today = new Date();
+        const dateStr = today.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+        document.getElementById('currentDate').innerHTML = dateStr;
+        document.getElementById('currentDateBanner').innerHTML = dateStr;
+
+        loadData();
+        renderAll();
+        initTabs();
+    </script>
+</body>
+</html>
